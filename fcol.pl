@@ -20,6 +20,7 @@ my ($server,$username,$password,$data_source,$exclude_db) = @config{qw(sybase_se
 my $refresh_data = 0;
 my $dbs = '';
 my $help = 0;
+my $look_for_table = 0; # look for table
  
 GetOptions(
 	'sybase_server=s' => \$server,
@@ -29,6 +30,7 @@ GetOptions(
 	'refresh_data' => \$refresh_data,
 	'exclude_db=s' => \$exclude_db,
 	'db=s' => \$dbs,
+	'table' => \$look_for_table,
 	'help' => \$help,
 );
 pod2usage(-verbose  => 2) if $help;
@@ -83,18 +85,23 @@ pod2usage("$0: No columns to look for given.") unless (@columns_re);
 for my $db (sort @dbs) {	
 	my $tables = $data->{$db};
 	next unless $tables;
-	TABLE:
-	for my $table (sort keys %$tables) {
-		my @tcolumns = @{$tables->{$table}};
-		# find if some set of columns match to all specified templates
-		my %matched_columns;
-		for my $re (@columns_re) {
-			my @m = grep m{$re}i, @tcolumns;
-			next TABLE unless @m;
-			@matched_columns{@m} = ();
-		}
-		printf "$db..$table : %s\n",join(", ",sort keys %matched_columns);
-	}
+    show_matches($db,$tables,$_) for (sort keys %$tables);
+}
+
+sub show_matches {
+    my ($db,$tables,$table) = @_;
+    # show the table name if it matches all the regs
+    printf "%s..%s\n",$db,$table if grep($table =~ m{$_}, @columns_re) == @columns_re;
+    return if $look_for_table;
+    my @tcolumns = @{$tables->{$table}};
+    # find if some set of columns match to all specified templates
+    my %matched_columns;
+    for my $re (@columns_re) {
+        my @m = grep m{$re}i, @tcolumns;
+        return;
+        @matched_columns{@m} = ();
+    }
+    printf "$db..$table : %s\n",join(", ",sort keys %matched_columns);
 }
 
 sub scan_db_columns {
