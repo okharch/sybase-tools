@@ -155,6 +155,7 @@ Options:
 	-username=$username user for auth
 	-password=$password password for auth
 	-refresh_data 	to refresh data for list of database in scope
+	-table		look only with table names for specified pattern(s), avoid columns scanning 
 	-exclude_db=s   to ovveride list of databases specified in config
 	-db=s			to set list of databases explicitly rather than all databases from server.
 	
