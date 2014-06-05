@@ -79,6 +79,9 @@ if ($updated) {
 	write_file( $dat_file, {binmode => ':raw'}, $buf );
 }
 
+# exit silently if -r option and no columns to look for given
+exit 0 if $refresh_data && !@columns_re;
+
 pod2usage("$0: No columns to look for given.") unless (@columns_re);
 
 # now when we have columns scan over all tables for specified columns
