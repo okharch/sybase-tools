@@ -23,7 +23,7 @@ pod2usage("$0: No columns to look for given.") unless (@columns_re);
 
 # now when we have columns scan over all tables for specified columns
 my @dbs = sort keys %$data;
-printf "scaning %d databases for matches : %s\n",scalar(@dbs),join(" & ", @columns_re) if $verbose;
+printf STDERR "scaning %d databases for matches : %s\n",scalar(@dbs),join(" & ", @columns_re) if $verbose;
 for my $db (@dbs) {	
 	my $tables = $data->{$db};
 	next unless $tables;
@@ -54,10 +54,10 @@ sub scan_db_columns {
 	sql_exec "use $db";
 	1;
 	} or do {
-		print "database $db can't be scanned with configured user";
+		print STDERR "database $db can't be scanned with configured user";
 		return;
 	};
-	print "scanning database $db..." if $verbose;
+	print STDERR "scanning database $db..." if $verbose;
 	my @data = sql_query q{
 SELECT table_name=sysobjects.name, column_name=syscolumns.name 
 FROM sysobjects INNER JOIN syscolumns ON sysobjects.id = syscolumns.id 
@@ -74,7 +74,7 @@ where sysobjects.type='U'
 my $connected;
 sub db_connect {
 	return if $connected;
-	print "Connecting to database...";
+	print STDERR "Connecting to database..." if $verbose;
 	my $data_source = "dbi:Sybase:$server";
 	my @options = (username=>$username,password=>$password) if $username;
 	db_use($data_source,@options);
@@ -142,7 +142,7 @@ $updated = 1 if grep exists $data->{$_}, keys %exclude_db;
 
 # save data file if updated
 if ($updated) {
-	print "\nupdating $dat_file..." if $verbose;
+	print STDERR "\nupdating $dat_file..." if $verbose;
 	delete @{$data}{keys %exclude_db};
 	my $buf = encode_sereal($data);
 	write_file( $dat_file, {binmode => ':raw'}, $buf );
@@ -178,7 +178,7 @@ Options:
 	
     -table          look only for table names for specified pattern(s), avoid columns scanning 
 	
-    -verbose        show more current information on processing
+    -verbose        explain what it does to STDERR. otherwise it only shows if something has been found
     
     -help           display this help screen
 	
