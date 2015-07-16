@@ -1,4 +1,8 @@
 #!/usr/bin/env perl
+
+# (C) 2013-2015 Oleksandr Kharchenko okharch@gmail.com, UBS
+# look for the latest version at https://github.com/okharch/sybase-tools/blob/master/sybase-find-metadata.pl
+
 use strict;
 use warnings;
 use DBIx::Brev;
